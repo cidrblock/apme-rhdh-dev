@@ -20,11 +20,11 @@ else
   echo "         Start it with: cd ~/github/apme && tox -e up"
 fi
 
+set_compose_mode "normal"
+compose_args "normal"
+
 echo "Starting RHDH Local in ${RHDH_LOCAL} (APME_BASE_URL=${APME_BASE_URL})"
 cd "${RHDH_LOCAL}"
-
-# COMPOSE may be "podman compose" or "docker compose"
-read -r -a COMPOSE_ARR <<< "${COMPOSE}"
 
 # Force recreate so install-dynamic-plugins re-runs and rhdh reloads
 # app-config.dynamic-plugins.yaml (plain `up -d` leaves a running rhdh stale).
@@ -33,4 +33,5 @@ read -r -a COMPOSE_ARR <<< "${COMPOSE}"
 echo
 echo "RHDH Local: http://localhost:7007  (Guest login)"
 echo "Quality:    http://localhost:7007/self-service/repositories/catalog/quality"
+echo "FE HMR:     make react   |   FE in RHDH: make up-dev then make sync-dev"
 echo "Logs:       (cd ${RHDH_LOCAL} && ${COMPOSE} logs -f rhdh)"

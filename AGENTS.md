@@ -1,12 +1,9 @@
 # Agent notes — apme-rhdh-dev
 
-This workspace stands up **APME Portal dynamic plugins** in **RHDH Local** against a
-local APME Gateway.
+This workspace stands up **APME Portal dynamic plugins** against a local APME
+Gateway — either via **monorepo React** (`make react`) or **RHDH Local**.
 
 ## Skill (read first)
-
-When helping a user get running, sync plugins, or debug this loop, read and
-follow:
 
 **[`.cursor/skills/apme-rhdh-local/SKILL.md`](.cursor/skills/apme-rhdh-local/SKILL.md)**
 
@@ -17,11 +14,18 @@ Human overview: [`README.md`](README.md)
 ## Quick commands
 
 ```bash
-make setup          # one-time
-# APME Gateway: cd ~/github/apme && tox -e up
+make setup
+
+# Everyday UI (preferred for most APME FE work)
+# Gateway: cd ~/github/apme && tox -e up
+make react
+
+# RHDH dynamic plugins
 make sync && make up
+# FE --dev loop: make up-dev → edit → make sync-dev → refresh
+
 make status
 make down
 ```
 
-UI: **http://localhost:7007** (Guest). Not `127.0.0.1`.
+RHDH UI: **http://localhost:7007** (Guest). Not `127.0.0.1`.

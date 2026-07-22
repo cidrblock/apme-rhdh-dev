@@ -4,7 +4,9 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 
 load_env
+compose_args
 cd "${RHDH_LOCAL}"
-read -r -a COMPOSE_ARR <<< "${COMPOSE}"
 "${COMPOSE_ARR[@]}" down
+# Clear mode so the next make up starts clean
+rm -f "$(compose_mode_file)"
 echo "RHDH Local stopped."

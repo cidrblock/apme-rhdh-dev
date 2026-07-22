@@ -71,8 +71,12 @@ Then retry Scan in the UI.
 - Gateway connection refused from UI → `tox -e up` in `apme`; verify
   `APME_BASE_URL` (`host.containers.internal` Podman / `host.docker.internal` Docker)
 
-## Plugin export
+## Plugin export / which make target
 
 - Node **20 or 22**; `cd $PLUGIN_REPO && yarn install` if `rhdh-cli` missing
 - Wrong branch → `prototype/apme`
-- After plugin code changes → `make sync && make up` (plain `up` alone is not enough)
+- Everyday UI → `make react` (not sync-restart)
+- FE in RHDH without recreate → `make up-dev` once, then `make sync-dev` + refresh
+- Full dynamic-plugin check → `make sync-restart`
+- `make sync-dev` while compose mode is `normal` → start with `make up-dev` first
+- `make up-dev` without prior `make sync` → run `make sync` once for backends

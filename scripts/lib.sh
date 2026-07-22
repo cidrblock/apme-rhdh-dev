@@ -111,3 +111,41 @@ EOF
   echo "  catalog template: …/apme-register-git-repository/template.yaml"
   echo "  seed entity:      …/seed-git-repository.yaml"
 }
+
+# Compose mode marker in rhdh-local (normal | dev). Written by start / start-dev.
+compose_mode_file() {
+  echo "${RHDH_LOCAL}/.apme-rhdh-dev-compose-mode"
+}
+
+get_compose_mode() {
+  load_env
+  local f
+  f="$(compose_mode_file)"
+  if [[ -f "${f}" ]]; then
+    cat "${f}"
+  else
+    echo "normal"
+  fi
+}
+
+set_compose_mode() {
+  load_env
+  mkdir -p "${RHDH_LOCAL}"
+  echo "$1" >"$(compose_mode_file)"
+}
+
+# Populate COMPOSE_ARR with the right -f flags for the current (or forced) mode.
+# Usage: compose_args [normal|dev]
+compose_args() {
+  load_env
+  local mode="${1:-$(get_compose_mode)}"
+  read -r -a COMPOSE_ARR <<< "${COMPOSE}"
+  COMPOSE_ARR+=(-f compose.yaml -f compose.override.yaml)
+  if [[ "${mode}" == "dev" ]]; then
+    if [[ ! -f "${RHDH_LOCAL}/compose-dynamic-plugins-root.yaml" ]]; then
+      echo "Missing ${RHDH_LOCAL}/compose-dynamic-plugins-root.yaml (update rhdh-local)" >&2
+      exit 1
+    fi
+    COMPOSE_ARR+=(-f compose-dynamic-plugins-root.yaml)
+  fi
+}

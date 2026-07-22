@@ -10,13 +10,17 @@ This is **not** a full Portal / OpenShift substitute. Use it for:
 - UI work against a real Gateway on `:8080`
 - Validating export / `pluginConfig` wiring before Helm/OCI
 
-For fast React composition in the monorepo, keep using `yarn start` on
-`ansible-backstage-plugins@prototype/apme`. Use this repo when you care about
-the **dynamic plugin** shape.
-
 **Agents:** follow [`.cursor/skills/apme-rhdh-local/SKILL.md`](.cursor/skills/apme-rhdh-local/SKILL.md)
 (and [`AGENTS.md`](AGENTS.md)). Ask Cursor to use the **apme-rhdh-local** skill
 when standing this up.
+
+### Pick your loop
+
+| Goal | Command |
+|------|---------|
+| **Everyday APME UI** (fastest — HMR) | Gateway up → `make react` |
+| **UI inside real RHDH** as a dynamic plugin | `make sync` (once) → `make up-dev` → edit → `make sync-dev` → refresh |
+| **Full export / ship-shape check** | `make sync-restart` |
 
 ---
 
@@ -49,16 +53,27 @@ systemctl --user enable --now podman.socket   # Podman users
 make setup                    # clones rhdh-local if missing; wires configs
 ```
 
-### Every day
+### Every day — React UI (default for most APME plugin work)
 
 ```bash
-# Terminal A — APME pod (Gateway :8080)
+# Terminal A — APME Gateway (real scans)
 cd ~/github/apme && tox -e up
 
-# Terminal B — export plugins + start RHDH Local
+# Terminal B — monorepo app with HMR
 cd ~/github/apme-rhdh-dev
-make sync              # export APME + self-service into rhdh-local/local-plugins
-make up                # install-dynamic-plugins + start RHDH
+make react             # yarn start in PLUGIN_REPO
+```
+
+### Every day — RHDH Local (dynamic plugins)
+
+```bash
+# Terminal A
+cd ~/github/apme && tox -e up
+
+# Terminal B
+cd ~/github/apme-rhdh-dev
+make sync
+make up                # or make up-dev for the FE --dev loop (below)
 ```
 
 Open **http://localhost:7007** → sign in as **Guest**.
@@ -69,7 +84,19 @@ APME Quality UX (prototype):
 - Quality overview: `/self-service/repositories/catalog/quality`
 - Per-repo: open a Git repository entity → **APME** / Quality tab
 
-Stop:
+### FE inside RHDH without recreating containers
+
+```bash
+make sync              # once (backends + baseline into local-plugins)
+make up-dev            # start RHDH with dynamic-plugins-root + initial FE export
+# edit plugins/backstage-apme …
+make sync-dev          # re-export FE only
+# hard-refresh the browser — no make up
+```
+
+Optional: `SYNC_DEV_PLUGINS="backstage-apme self-service" make sync-dev`
+
+Stop RHDH:
 
 ```bash
 make down
@@ -82,14 +109,18 @@ make down
 | Target | Action |
 |--------|--------|
 | `make setup` | Ensure `rhdh-local` exists; copy compose/app-config/plugin overrides; create `.env` |
-| `make sync` | `yarn export-dynamic` for required plugins → `rhdh-local/local-plugins/` |
-| `make up` | `podman compose up -d` in `rhdh-local` (Lightspeed disabled) |
+| `make react` | `yarn start` in `PLUGIN_REPO` (fastest UI HMR — not RHDH) |
+| `make sync` | `yarn export-dynamic` → `rhdh-local/local-plugins/` |
+| `make up` | Start RHDH Local (full install-dynamic-plugins path) |
+| `make up-dev` | Start RHDH with `compose-dynamic-plugins-root` + initial `sync-dev` |
+| `make sync-dev` | `export --dev` FE into `dynamic-plugins-root`; refresh browser |
+| `make sync-restart` | `sync` + `up` (full recreate after plugin changes) |
 | `make down` | Tear down RHDH Local containers |
-| `make restart` | Restart RHDH after config-only changes (no re-export) |
-| `make status` | Print paths, Gateway health, compose status |
+| `make restart` | Restart rhdh (app-config only) |
+| `make status` | Paths / Gateway / compose mode |
 
-After **plugin code** changes: `make sync && make up` (or `make sync-restart`).  
-After **app-config only** changes: `make restart`.
+After **app-config only** changes: `make restart`.  
+See also [RHDH Local plugins guide](https://github.com/redhat-developer/rhdh-local/blob/main/docs/rhdh-local-guide/plugins-guide.md).
 
 ---
 
@@ -109,10 +140,9 @@ apme-rhdh-dev/
 ├── catalog/
 │   └── apme-register-git-repository/   # Add repository scaffolder template
 └── scripts/
-    ├── setup.sh
-    ├── sync-plugins.sh
-    ├── start.sh
-    └── stop.sh
+    ├── setup.sh / sync-plugins.sh / start.sh / start-dev.sh
+    ├── sync-dev.sh / react.sh / stop.sh / restart.sh / status.sh
+    └── lib.sh
 ```
 
 Configs (and the APME catalog template) are **copied** into `rhdh-local/` on
@@ -130,6 +160,7 @@ Configs (and the APME catalog template) are **copied** into `rhdh-local/` on
 | `RHDH_LOCAL` | `$HOME/github/rhdh-local` | RHDH Local checkout |
 | `APME_BASE_URL` | `http://host.containers.internal:8080` | Gateway as seen **from** the RHDH container |
 | `COMPOSE` | `podman compose` | Or `docker compose` |
+| `SYNC_DEV_PLUGINS` | `backstage-apme` | FE plugins for `make sync-dev` |
 
 `host.containers.internal` is the Podman host gateway. Docker Desktop usually
 works with `http://host.docker.internal:8080` — set `APME_BASE_URL` accordingly.
@@ -142,15 +173,6 @@ Verify Gateway on the host first:
 curl -sS -o /dev/null -w '%{http_code}\n' http://localhost:8080/docs
 # expect 200
 ```
-
----
-
-## Frontend hot reload (optional)
-
-For faster FE iteration inside RHDH Local (no full re-pack each time), see
-[RHDH Local plugins guide](https://github.com/redhat-developer/rhdh-local/blob/main/docs/rhdh-local-guide/plugins-guide.md)
-(`rhdh-cli plugin export --dev`). Most day-to-day UI work is still faster with
-`yarn start` in `PLUGIN_REPO`.
 
 ---
 

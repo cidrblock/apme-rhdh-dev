@@ -6,7 +6,7 @@ help:
 	@echo "APME RHDH Local — pick a loop:"
 	@echo ""
 	@echo "  Everyday UI (fastest HMR):"
-	@echo "    make react           yarn start in PLUGIN_REPO"
+	@echo "    make react           yarn start → http://localhost:3001 (backend :7008)"
 	@echo ""
 	@echo "  Dynamic plugins in RHDH:"
 	@echo "    make sync            Export plugins → local-plugins (once / backends)"

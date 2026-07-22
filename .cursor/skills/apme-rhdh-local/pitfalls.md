@@ -75,7 +75,9 @@ Then retry Scan in the UI.
 
 - Node **20 or 22**; `cd $PLUGIN_REPO && yarn install` if `rhdh-cli` missing
 - Wrong branch → `prototype/apme`
-- Everyday UI → `make react` (not sync-restart)
+- Everyday UI → `make react` → http://localhost:3001 (not sync-restart)
+- `EADDRINUSE :3000` on `make react` → you’re on an old script; pull latest
+  (`make react` uses **3001/7008**). Native APME dashboard keeps **:3000**.
 - FE in RHDH without recreate → `make up-dev` once, then `make sync-dev` + refresh
 - Full dynamic-plugin check → `make sync-restart`
 - `make sync-dev` while compose mode is `normal` → start with `make up-dev` first

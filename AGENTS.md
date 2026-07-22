@@ -16,7 +16,7 @@ Human overview: [`README.md`](README.md)
 ```bash
 make setup
 
-# Everyday UI (preferred for most APME FE work)
+# Everyday UI (preferred for most APME FE work) → http://localhost:3001
 # Gateway: cd ~/github/apme && tox -e up
 make react
 

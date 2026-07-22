@@ -23,7 +23,7 @@ scripts by hand.
 
 | Goal | Commands |
 |------|----------|
-| **Everyday APME UI** (default — HMR) | Gateway → `make react` |
+| **Everyday APME UI** (default — HMR) | Gateway → `make react` → http://localhost:3001 |
 | **UI as dynamic plugin in RHDH** | `make sync` → `make up-dev` → edit → `make sync-dev` → refresh |
 | **Full export / ship-shape** | `make sync-restart` |
 
@@ -72,9 +72,12 @@ make setup
 
 ### Everyday UI (`make react`)
 
+Uses **:3001** (FE) and **:7008** (backend) so native APME (`:3000`) and RHDH
+Local (`:7007`) can stay running. Overlay: `configs/app-config.react.yaml`.
+
 ```bash
 cd "${HOME}/github/apme" && tox -e up          # Terminal A
-cd /path/to/apme-rhdh-dev && make react        # Terminal B — yarn start
+cd /path/to/apme-rhdh-dev && make react        # Terminal B → http://localhost:3001
 ```
 
 ### RHDH full path

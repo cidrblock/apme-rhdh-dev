@@ -18,7 +18,7 @@ when standing this up.
 
 | Goal | Command |
 |------|---------|
-| **Everyday APME UI** (fastest — HMR) | Gateway up → `make react` |
+| **Everyday APME UI** (fastest — HMR) | Gateway up → `make react` → http://localhost:3001 |
 | **UI inside real RHDH** as a dynamic plugin | `make sync` (once) → `make up-dev` → edit → `make sync-dev` → refresh |
 | **Full export / ship-shape check** | `make sync-restart` |
 
@@ -59,9 +59,9 @@ make setup                    # clones rhdh-local if missing; wires configs
 # Terminal A — APME Gateway (real scans)
 cd ~/github/apme && tox -e up
 
-# Terminal B — monorepo app with HMR
+# Terminal B — monorepo app with HMR (ports 3001 / 7008 — not native :3000)
 cd ~/github/apme-rhdh-dev
-make react             # yarn start in PLUGIN_REPO
+make react             # yarn start → http://localhost:3001
 ```
 
 ### Every day — RHDH Local (dynamic plugins)
@@ -109,7 +109,7 @@ make down
 | Target | Action |
 |--------|--------|
 | `make setup` | Ensure `rhdh-local` exists; copy compose/app-config/plugin overrides; create `.env` |
-| `make react` | `yarn start` in `PLUGIN_REPO` (fastest UI HMR — not RHDH) |
+| `make react` | `yarn start` in `PLUGIN_REPO` on **:3001** / backend **:7008** (avoids native APME `:3000` and RHDH `:7007`) |
 | `make sync` | `yarn export-dynamic` → `rhdh-local/local-plugins/` |
 | `make up` | Start RHDH Local (full install-dynamic-plugins path) |
 | `make up-dev` | Start RHDH with `compose-dynamic-plugins-root` + initial `sync-dev` |
@@ -135,7 +135,8 @@ apme-rhdh-dev/
 ├── .cursor/skills/apme-rhdh-local/     # Cursor skill: get up and running
 ├── configs/
 │   ├── dynamic-plugins.override.yaml   # enable APME + self-service
-│   ├── app-config.local.yaml           # apme.baseUrl + catalog template
+│   ├── app-config.local.yaml           # apme.baseUrl + catalog template (RHDH)
+│   ├── app-config.react.yaml           # ports 3001/7008 for make react
 │   └── compose.override.yaml           # host.containers.internal + no Lightspeed
 ├── catalog/
 │   └── apme-register-git-repository/   # Add repository scaffolder template
@@ -161,6 +162,8 @@ Configs (and the APME catalog template) are **copied** into `rhdh-local/` on
 | `APME_BASE_URL` | `http://host.containers.internal:8080` | Gateway as seen **from** the RHDH container |
 | `COMPOSE` | `podman compose` | Or `docker compose` |
 | `SYNC_DEV_PLUGINS` | `backstage-apme` | FE plugins for `make sync-dev` |
+| `REACT_PORT` | `3001` | Frontend for `make react` (see `configs/app-config.react.yaml`) |
+| `REACT_BACKEND_PORT` | `7008` | Backend for `make react` |
 
 `host.containers.internal` is the Podman host gateway. Docker Desktop usually
 works with `http://host.docker.internal:8080` — set `APME_BASE_URL` accordingly.

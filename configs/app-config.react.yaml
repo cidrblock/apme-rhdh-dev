@@ -1,0 +1,27 @@
+# Overlay for `make react` (yarn start in PLUGIN_REPO).
+# Avoids clashes with native APME UI (:3000) and RHDH Local (:7007).
+#
+# Frontend:  http://localhost:3001
+# Backend:   http://localhost:7008
+# Gateway:   http://localhost:8080  (host — not host.containers.internal)
+
+app:
+  title: APME portal plugins (yarn start)
+  baseUrl: http://localhost:3001
+
+backend:
+  baseUrl: http://localhost:7008
+  listen:
+    port: 7008
+  cors:
+    origin: http://localhost:3001
+
+ansible:
+  apme:
+    enabled: true
+    baseUrl: http://localhost:8080
+    checkSSL: false
+    enableAi: false
+    mockMode: false
+    # Same local-dev escape hatch as RHDH Local app-config
+    useStockCreateForRegister: true

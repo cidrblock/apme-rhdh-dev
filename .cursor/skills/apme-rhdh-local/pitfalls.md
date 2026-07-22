@@ -90,6 +90,11 @@ Then retry Scan in the UI.
   `AUTH_SIGNING_KEY` in this repo’s `.env` so keys stay stable.
 - `/api/catalog/ansible/sync/status` 403/404 without real AAP → expected noise
   from self-service polling; not the cause of page 404s.
+- `make react` “dropped the mic” on `/self-service/repositories/*` while APIs
+  return 200 → **RBAC DENY**. Guest is `user:development/guest`; Portal RBAC
+  was denying `ansible.gitRepositories.view` (RequirePermission → 404 page).
+  `app-config.react.yaml` sets `permission.enabled: false` for the FE loop.
+  **Restart** `make react` after pulling that change.
 - FE in RHDH without recreate → `make up-dev` once, then `make sync-dev` + refresh
 - Full dynamic-plugin check → `make sync-restart`
 - `make sync-dev` while compose mode is `normal` → start with `make up-dev` first

@@ -64,14 +64,18 @@ ansible:
     token: ${AAP_API_TOKEN}
     checkSSL: false
 
-# Guest as RBAC admin so Git Repositories / Quality routes authorize locally.
+# FE loop: do not enforce Portal RBAC. RequirePermission maps DENY → the
+# "dropped the mic" 404 page (e.g. /self-service/repositories/catalog).
+# Guest signs in as user:development/guest (auth.environment=development).
 permission:
-  enabled: true
+  enabled: false
   rbac:
     admin:
       users:
+        - name: user:development/guest
         - name: user:default/guest
         - name: user:default/admin
       superUsers:
+        - name: user:development/guest
         - name: user:default/guest
         - name: user:default/admin

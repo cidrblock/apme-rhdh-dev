@@ -109,9 +109,36 @@ ensure_native_modules() {
 }
 ensure_native_modules
 
-# Same secrets bootstrap as PLUGIN_REPO/scripts/start.sh
-export BACKEND_SECRET="${BACKEND_SECRET:-$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")}"
-export AUTH_SIGNING_KEY="${AUTH_SIGNING_KEY:-$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")}"
+# Persist backend secrets in this repo's .env so Guest JWTs survive restart.
+# Regenerating keys each run causes ERR_JWKS_NO_MATCHING_KEY → 401s → UI 404s.
+persist_react_secrets() {
+  local env_file="${ROOT_DIR}/.env"
+  local secret key
+  secret="${BACKEND_SECRET:-}"
+  key="${AUTH_SIGNING_KEY:-}"
+  if [[ -z "${secret}" || -z "${key}" ]]; then
+    secret="${secret:-$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")}"
+    key="${key:-$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")}"
+    touch "${env_file}"
+    if ! grep -q '^BACKEND_SECRET=' "${env_file}" 2>/dev/null; then
+      printf '\n# make react — stable across restarts (do not commit secrets)\nBACKEND_SECRET=%s\n' "${secret}" >>"${env_file}"
+    fi
+    if ! grep -q '^AUTH_SIGNING_KEY=' "${env_file}" 2>/dev/null; then
+      printf 'AUTH_SIGNING_KEY=%s\n' "${key}" >>"${env_file}"
+    fi
+    # Re-read in case file already had one of the two
+    set -a
+    # shellcheck disable=SC1091
+    source "${env_file}"
+    set +a
+    secret="${BACKEND_SECRET:-$secret}"
+    key="${AUTH_SIGNING_KEY:-$key}"
+  fi
+  export BACKEND_SECRET="${secret}"
+  export AUTH_SIGNING_KEY="${key}"
+}
+persist_react_secrets
+
 export PORT="${REACT_PORT}"
 export NODE_OPTIONS="${NODE_OPTIONS:-} --no-node-snapshot"
 
@@ -122,10 +149,11 @@ echo "  Overlay:   ${REACT_CONFIG}"
 echo "  Node:      $(node -v)"
 echo
 echo "Open after backend is ready (wait for Listening on :${REACT_BACKEND_PORT}):"
-echo "  Sign in as Guest"
+echo "  Sign in as Guest  (if you see 401/JWKS errors: clear site data for localhost:${REACT_PORT})"
 echo "  Git Repositories: http://localhost:${REACT_PORT}/self-service/repositories/catalog"
 echo "  Content Quality:  http://localhost:${REACT_PORT}/self-service/repositories/quality"
 echo "  (/apme is a legacy redirect and may 404 — do not use it)"
+echo "  (ansible sync/status 403/404 without real AAP is expected — ignore)"
 echo
 echo "Stop with Ctrl+C. For dynamic-plugin checks use: make up-dev / make sync-dev"
 echo

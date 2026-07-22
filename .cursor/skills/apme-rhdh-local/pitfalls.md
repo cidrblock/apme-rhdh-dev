@@ -84,6 +84,12 @@ Then retry Scan in the UI.
   (Node 20 vs 22). `make react` rebuilds it; or
   `cd $PLUGIN_REPO && yarn rebuild better-sqlite3`. Also need AAP/auth stubs
   (script sets them; see `configs/app-config.react.yaml`).
+- `make react` 401 / `ERR_JWKS_NO_MATCHING_KEY` after restart → browser still has
+  an old Guest JWT. **Clear site data** for `http://localhost:3001` (or Sign out)
+  and Guest again. `make react` now persists `BACKEND_SECRET` /
+  `AUTH_SIGNING_KEY` in this repo’s `.env` so keys stay stable.
+- `/api/catalog/ansible/sync/status` 403/404 without real AAP → expected noise
+  from self-service polling; not the cause of page 404s.
 - FE in RHDH without recreate → `make up-dev` once, then `make sync-dev` + refresh
 - Full dynamic-plugin check → `make sync-restart`
 - `make sync-dev` while compose mode is `normal` → start with `make up-dev` first

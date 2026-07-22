@@ -13,7 +13,8 @@
 ## Sign-in / Home
 
 - Sign-in page only → **Guest → Enter**.
-- Home 404 → use Catalog, `/apme`, or `/self-service` (DynamicHomePage may be absent).
+- Home 404 → use Catalog or `/self-service/repositories/catalog` (DynamicHomePage may be absent).
+- `make react`: use `/self-service/repositories/catalog` or `/quality` — **not** `/apme`.
 
 ## RH AAP “Login failed, popup was closed”
 
@@ -78,6 +79,11 @@ Then retry Scan in the UI.
 - Everyday UI → `make react` → http://localhost:3001 (not sync-restart)
 - `EADDRINUSE :3000` on `make react` → you’re on an old script; pull latest
   (`make react` uses **3001/7008**). Native APME dashboard keeps **:3000**.
+- `make react` UI 404 / every `/api/*` 404 / “Backend has not started yet” →
+  backend failed. Common cause: `better-sqlite3` built for another Node ABI
+  (Node 20 vs 22). `make react` rebuilds it; or
+  `cd $PLUGIN_REPO && yarn rebuild better-sqlite3`. Also need AAP/auth stubs
+  (script sets them; see `configs/app-config.react.yaml`).
 - FE in RHDH without recreate → `make up-dev` once, then `make sync-dev` + refresh
 - Full dynamic-plugin check → `make sync-restart`
 - `make sync-dev` while compose mode is `normal` → start with `make up-dev` first

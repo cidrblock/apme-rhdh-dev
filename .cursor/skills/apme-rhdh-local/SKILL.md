@@ -114,7 +114,9 @@ make sync-dev             # then hard-refresh browser
 | What | URL |
 |------|-----|
 | RHDH | http://localhost:7007 |
-| Quality fleet | http://localhost:7007/self-service/repositories/catalog/quality |
+| Quality fleet (`make react`) | http://localhost:3001/self-service/repositories/quality |
+| Git Repositories (`make react`) | http://localhost:3001/self-service/repositories/catalog |
+| Quality fleet (RHDH) | http://localhost:7007/self-service/repositories/quality |
 | Seeded repo | Catalog → **ansible-lightspeed** → APME / Quality |
 | Stock Create (no AAP) | http://localhost:7007/create/templates/default/apme-register-git-repository |
 | Gateway docs | http://localhost:8080/docs |

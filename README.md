@@ -61,8 +61,17 @@ cd ~/github/apme && tox -e up
 
 # Terminal B — monorepo app with HMR (ports 3001 / 7008 — not native :3000)
 cd ~/github/apme-rhdh-dev
-make react             # yarn start → http://localhost:3001
+make react             # → http://localhost:3001
 ```
+
+Wait until the log shows `Listening on :7008` and plugin init completes (not just the FE).
+Sign in as **Guest**, then:
+
+- Git Repositories: http://localhost:3001/self-service/repositories/catalog
+- Content Quality: http://localhost:3001/self-service/repositories/quality
+- Per-repo: open a repository → **Quality** tab
+
+Do **not** use `/apme` in `make react` mode (legacy redirect; often 404).
 
 ### Every day — RHDH Local (dynamic plugins)
 
@@ -81,7 +90,7 @@ Open **http://localhost:7007** → sign in as **Guest**.
 APME Quality UX (prototype):
 
 - Fleet / catalog: `/self-service/repositories/catalog`
-- Quality overview: `/self-service/repositories/catalog/quality`
+- Quality overview: `/self-service/repositories/quality`
 - Per-repo: open a Git repository entity → **APME** / Quality tab
 
 ### FE inside RHDH without recreating containers

@@ -26,6 +26,33 @@ if [[ ! -f "${REACT_CONFIG}" ]]; then
   exit 1
 fi
 
+# Load PLUGIN_REPO/.env when present (same vars yarn start / dotenv-cli use).
+if [[ -f "${PLUGIN_REPO}/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${PLUGIN_REPO}/.env"
+  set +a
+fi
+
+# Stubs so backend config schema is satisfied without a real AAP / OAuth app.
+# Override via PLUGIN_REPO/.env when you have real values.
+export AAP_HOST="${AAP_HOST:-http://127.0.0.1:9}"
+export AAP_API_TOKEN="${AAP_API_TOKEN:-local-dev-unused-token}"
+export AAP_AUTH_CLIENT_ID="${AAP_AUTH_CLIENT_ID:-local-dev}"
+export AAP_AUTH_CLIENT_SECRET="${AAP_AUTH_CLIENT_SECRET:-local-dev}"
+export AUTH_GITHUB_CLIENT_ID="${AUTH_GITHUB_CLIENT_ID:-local-dev}"
+export AUTH_GITHUB_CLIENT_SECRET="${AUTH_GITHUB_CLIENT_SECRET:-local-dev}"
+export AUTH_GITLAB_CLIENT_ID="${AUTH_GITLAB_CLIENT_ID:-local-dev}"
+export AUTH_GITLAB_CLIENT_SECRET="${AUTH_GITLAB_CLIENT_SECRET:-local-dev}"
+
+# Empty integration tokens break Backstage config ("empty-string" invalid).
+if [[ -z "${GITHUB_INTEGRATION_TOKEN:-}" ]]; then
+  unset GITHUB_INTEGRATION_TOKEN || true
+fi
+if [[ -z "${GITLAB_INTEGRATION_TOKEN:-}" ]]; then
+  unset GITLAB_INTEGRATION_TOKEN || true
+fi
+
 port_in_use() {
   local port="$1"
   if command -v ss >/dev/null 2>&1; then
@@ -60,6 +87,28 @@ if [[ ! -x "${PLUGIN_REPO}/node_modules/.bin/backstage-cli" ]]; then
   (cd "${PLUGIN_REPO}" && yarn install)
 fi
 
+# Native modules (better-sqlite3) must match the current Node ABI.
+# NODE_MODULE_VERSION 111 = Node 20; 127 = Node 22. Mismatch → backend never
+# becomes ready and every /api/* returns 404 (UI shows page-not-found).
+ensure_native_modules() {
+  if ! (
+    cd "${PLUGIN_REPO}"
+    node -e "require('better-sqlite3')" >/dev/null 2>&1
+  ); then
+    echo "better-sqlite3 ABI mismatch for Node $(node -v) — rebuilding…"
+    (cd "${PLUGIN_REPO}" && yarn rebuild better-sqlite3)
+    if ! (
+      cd "${PLUGIN_REPO}"
+      node -e "require('better-sqlite3')" >/dev/null 2>&1
+    ); then
+      echo "ERROR: better-sqlite3 still fails to load under Node $(node -v)." >&2
+      echo "       Try: cd ${PLUGIN_REPO} && rm -rf node_modules && yarn install" >&2
+      exit 1
+    fi
+  fi
+}
+ensure_native_modules
+
 # Same secrets bootstrap as PLUGIN_REPO/scripts/start.sh
 export BACKEND_SECRET="${BACKEND_SECRET:-$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")}"
 export AUTH_SIGNING_KEY="${AUTH_SIGNING_KEY:-$(node -e "process.stdout.write(require('crypto').randomBytes(32).toString('base64'))")}"
@@ -70,6 +119,14 @@ echo "Starting plugin monorepo UI in ${PLUGIN_REPO}"
 echo "  Frontend:  http://localhost:${REACT_PORT}   (native APME UI stays on :3000)"
 echo "  Backend:   http://localhost:${REACT_BACKEND_PORT}   (RHDH Local stays on :7007)"
 echo "  Overlay:   ${REACT_CONFIG}"
+echo "  Node:      $(node -v)"
+echo
+echo "Open after backend is ready (wait for Listening on :${REACT_BACKEND_PORT}):"
+echo "  Sign in as Guest"
+echo "  Git Repositories: http://localhost:${REACT_PORT}/self-service/repositories/catalog"
+echo "  Content Quality:  http://localhost:${REACT_PORT}/self-service/repositories/quality"
+echo "  (/apme is a legacy redirect and may 404 — do not use it)"
+echo
 echo "Stop with Ctrl+C. For dynamic-plugin checks use: make up-dev / make sync-dev"
 echo
 

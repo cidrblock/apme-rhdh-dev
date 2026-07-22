@@ -1,9 +1,12 @@
-# Overlay for `make react` (yarn start in PLUGIN_REPO).
+# Overlay for `make react` (backstage-cli repo start in PLUGIN_REPO).
 # Avoids clashes with native APME UI (:3000) and RHDH Local (:7007).
 #
 # Frontend:  http://localhost:3001
 # Backend:   http://localhost:7008
 # Gateway:   http://localhost:8080  (host — not host.containers.internal)
+#
+# Stubs below let the monorepo backend start without a real AAP / OAuth app.
+# Prefer PLUGIN_REPO/.env for real credentials when you have them.
 
 app:
   title: APME portal plugins (yarn start)
@@ -16,6 +19,35 @@ backend:
   cors:
     origin: http://localhost:3001
 
+# Avoid empty ${GITHUB_INTEGRATION_TOKEN} / ${GITLAB_INTEGRATION_TOKEN} from base config.
+integrations:
+  github: []
+  gitlab: []
+
+auth:
+  environment: development
+  providers:
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
+    # Satisfy schema when env vars are unset (react.sh also exports stubs).
+    github:
+      development:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+    gitlab:
+      development:
+        clientId: ${AUTH_GITLAB_CLIENT_ID}
+        clientSecret: ${AUTH_GITLAB_CLIENT_SECRET}
+    rhaap:
+      development:
+        host: ${AAP_HOST}
+        checkSSL: false
+        clientId: ${AAP_AUTH_CLIENT_ID}
+        clientSecret: ${AAP_AUTH_CLIENT_SECRET}
+        signIn:
+          resolvers:
+            - resolver: allowNewAAPUserSignIn
+
 ansible:
   apme:
     enabled: true
@@ -23,5 +55,23 @@ ansible:
     checkSSL: false
     enableAi: false
     mockMode: false
+    targetAnsibleCoreVersion: '2.16'
     # Same local-dev escape hatch as RHDH Local app-config
     useStockCreateForRegister: true
+  # Required by catalog-backend-module-rhaap (stub — no real AAP).
+  rhaap:
+    baseUrl: ${AAP_HOST}
+    token: ${AAP_API_TOKEN}
+    checkSSL: false
+
+# Guest as RBAC admin so Git Repositories / Quality routes authorize locally.
+permission:
+  enabled: true
+  rbac:
+    admin:
+      users:
+        - name: user:default/guest
+        - name: user:default/admin
+      superUsers:
+        - name: user:default/guest
+        - name: user:default/admin

@@ -169,7 +169,7 @@ For faster FE iteration inside RHDH Local (no full re-pack each time), see
 | Home 404 | Expected if DynamicHomePage failed to install; use **Catalog** or **/apme** / **/self-service** |
 | `apiRef{ansible}` on Self-service | Ensure `AAPApis` is in self-service `apiFactories` (see `configs/dynamic-plugins.override.yaml`) |
 | Template `apme-register-git-repository` 404 | `make up` after latest configs (catalog location + scaffolder module). Wait ~30s for catalog refresh, or check Catalog → Templates. |
-| **RH AAP “Login failed, popup was closed”** | Self-service **Create** always calls AAP OAuth (`aapAuth.getAccessToken`). For local APME, use **stock Create** (no popup): http://localhost:7007/create/templates/default/apme-register-git-repository — APME **Add repository** is wired to that path after `make sync`. Or open the seeded Catalog entity **ansible-lightspeed** (no Add flow). Do **not** set empty `GITHUB_TOKEN=` (Backstage rejects `""`). |
+| **RH AAP “Login failed, popup was closed”** | Self-service **Create** always calls AAP OAuth. This loop sets `ansible.apme.useStockCreateForRegister: true` so **Add repository** uses stock Create (no popup). Or open seeded Catalog entity **ansible-lightspeed**. Manual URL: `/create/templates/default/apme-register-git-repository`. Do **not** set empty `GITHUB_TOKEN=` (Backstage rejects `""`). Needs a `backstage-apme` build that supports that config key. |
 | RepoUrlPicker / GitHub empty | Type owner/repo manually, or add GitHub OAuth (RHDH Local GitHub guide) / real `GITHUB_TOKEN` then `make up` |
 | Catalog stuck 503 / empty-string token | Remove `GITHUB_TOKEN=` from `.env` / `rhdh-local/.env`, then `make up` |
 

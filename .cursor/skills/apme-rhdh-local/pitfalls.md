@@ -17,7 +17,12 @@
 
 ## RH AAP “Login failed, popup was closed”
 
-Self-service **Create** always calls AAP OAuth. For local APME without AAP:
+Self-service **Create** always calls AAP OAuth. This repo sets
+`ansible.apme.useStockCreateForRegister: true` so **Add repository** uses stock
+Create. Requires a `backstage-apme` export that supports that key; then
+`make sync && make up`.
+
+Fallback without the flag:
 
 - Stock Create: `/create/templates/default/apme-register-git-repository`
 - Or open seeded Catalog entity **ansible-lightspeed**

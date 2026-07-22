@@ -95,6 +95,10 @@ Then retry Scan in the UI.
   was denying `ansible.gitRepositories.view` (RequirePermission → 404 page).
   `app-config.react.yaml` sets `permission.enabled: false` for the FE loop.
   **Restart** `make react` after pulling that change.
+- `Failed to load template` / Add repository 404 → catalog has no
+  `Template:default/apme-register-git-repository`. `make react` must load
+  `catalog.locations` from `app-config.react.yaml` (pull + restart). Or use
+  seed entity **ansible-lightspeed** in Catalog → Quality.
 - FE in RHDH without recreate → `make up-dev` once, then `make sync-dev` + refresh
 - Full dynamic-plugin check → `make sync-restart`
 - `make sync-dev` while compose mode is `normal` → start with `make up-dev` first

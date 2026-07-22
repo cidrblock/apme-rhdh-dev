@@ -141,6 +141,9 @@ persist_react_secrets
 
 export PORT="${REACT_PORT}"
 export NODE_OPTIONS="${NODE_OPTIONS:-} --no-node-snapshot"
+# For catalog.locations in app-config.react.yaml
+export PLUGIN_REPO
+export APME_RHDH_DEV="${ROOT_DIR}"
 
 echo "Starting plugin monorepo UI in ${PLUGIN_REPO}"
 echo "  Frontend:  http://localhost:${REACT_PORT}   (native APME UI stays on :3000)"
@@ -151,6 +154,8 @@ echo
 echo "Open after backend is ready (wait for Listening on :${REACT_BACKEND_PORT}):"
 echo "  Sign in as Guest  (if you see 401/JWKS errors: clear site data for localhost:${REACT_PORT})"
 echo "  Git Repositories: http://localhost:${REACT_PORT}/self-service/repositories/catalog"
+echo "  Add repository:   http://localhost:${REACT_PORT}/create/templates/default/apme-register-git-repository"
+echo "  Seed repo (no add): Catalog → ansible-lightspeed → Quality"
 echo "  Content Quality:  http://localhost:${REACT_PORT}/self-service/repositories/quality"
 echo "  (/apme is a legacy redirect and may 404 — do not use it)"
 echo "  (ansible sync/status 403/404 without real AAP is expected — ignore)"

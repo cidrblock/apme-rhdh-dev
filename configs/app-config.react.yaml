@@ -79,3 +79,16 @@ permission:
         - name: user:development/guest
         - name: user:default/guest
         - name: user:default/admin
+
+# Required for Add repository (stock Create) + a seed repo for Quality without AAP.
+# Paths substituted from env set by scripts/react.sh.
+catalog:
+  locations:
+    - type: file
+      target: ${PLUGIN_REPO}/examples/apme-register-git-repository/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ${APME_RHDH_DEV}/catalog/seed-git-repository.yaml
+      rules:
+        - allow: [Component]

@@ -69,7 +69,9 @@ Sign in as **Guest**, then:
 
 - Git Repositories: http://localhost:3001/self-service/repositories/catalog
 - Content Quality: http://localhost:3001/self-service/repositories/quality
-- Per-repo: open a repository → **Quality** tab
+- **Add repository:** http://localhost:3001/create/templates/default/apme-register-git-repository  
+  (needs the seeded Template — restart `make react` after pull so catalog loads it)
+- **Skip Add:** Catalog → **ansible-lightspeed** → **Quality** tab (seed entity)
 
 Do **not** use `/apme` in `make react` mode (legacy redirect; often 404).
 

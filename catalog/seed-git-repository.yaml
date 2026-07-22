@@ -1,0 +1,34 @@
+# Seed git-repository entity for local APME Quality UI without AAP / Add repository.
+# Swap annotations to point at your own playbook repo if you like.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ansible-lightspeed-github-manual
+  namespace: default
+  title: ansible-lightspeed
+  description: Seed repo for local APME Quality testing (manually registered)
+  tags:
+    - git-repository
+    - github
+    - manually-registered
+  links:
+    - url: https://github.com/ansible/ansible-lightspeed
+      title: Repository
+      icon: github
+  annotations:
+    backstage.io/source-location: url:https://github.com/ansible/ansible-lightspeed
+    backstage.io/view-url: https://github.com/ansible/ansible-lightspeed
+    github.com/project-slug: ansible/ansible-lightspeed
+    ansible.io/scm-provider: github
+    ansible.io/scm-host: github.com
+    ansible.io/scm-organization: ansible
+    ansible.io/scm-repository: ansible-lightspeed
+    ansible.io/registration-method: manual
+spec:
+  type: git-repository
+  lifecycle: production
+  owner: user:guest
+  repository_name: ansible-lightspeed
+  repository_default_branch: main
+  repository_collection_count: 0
+  repository_ee_count: 0

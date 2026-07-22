@@ -1,0 +1,19 @@
+# Merged with rhdh-local/compose.yaml via: podman compose up -d
+# - Reach APME Gateway on the host
+# - Skip Developer Lightspeed (faster, fewer images)
+
+services:
+  rag-init:
+    profiles: [lightspeed]
+  lightspeed-core:
+    profiles: [lightspeed]
+
+  rhdh:
+    extra_hosts:
+      - "host.containers.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
+
+  install-dynamic-plugins:
+    extra_hosts:
+      - "host.containers.internal:host-gateway"
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,86 @@
+# APME portal plugins for RHDH Local (RHDH 1.10).
+#
+# Do NOT include dynamic-plugins.default.yaml — re-loads built-ins → blank page.
+#
+# ADR-010: when APME is loaded, register gitRepositoriesExtensionsApiFactory on
+# APME only. Do NOT also register defaultGitRepositoriesExtensionsApiFactory on
+# self-service (both together → blank page / catalog API factory crash).
+#
+# Do NOT mount LandingPage at `/` (collides with DynamicHomePage).
+
+plugins:
+  - package: ./dynamic-plugins/dist/red-hat-developer-hub-backstage-plugin-dynamic-home-page
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          red-hat-developer-hub.backstage-plugin-dynamic-home-page:
+            dynamicRoutes:
+              - importName: DynamicHomePage
+                path: /
+
+  - package: ./local-plugins/ansible-plugin-backstage-self-service
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          ansible.plugin-backstage-self-service:
+            apiFactories:
+              # Needed for SelfServicePage (apiRef{ansible}). Safe with APME.
+              - importName: AAPApis
+              - importName: AapAuthApi
+              - importName: EEBuildApis
+              # NOT defaultGitRepositoriesExtensionsApiFactory — see header.
+            dynamicRoutes:
+              - importName: SelfServicePage
+                path: /self-service
+                menuItem:
+                  text: Self-service
+                  icon: catalog
+
+  - package: ./local-plugins/ansible-plugin-backstage-apme
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        frontend:
+          ansible.plugin-backstage-apme:
+            apiFactories:
+              - importName: apmeApiFactory
+              - importName: gitRepositoriesExtensionsApiFactory
+            dynamicRoutes:
+              - path: /apme
+                importName: ApmePage
+                menuItem:
+                  text: APME
+                  icon: catalog
+              - path: /apme/project/:projectId
+                importName: ApmeProjectPage
+            entityTabs:
+              - path: /apme
+                title: APME
+                mountPoint: entity.page.apme
+                importName: ApmeEntityTab
+
+  - package: ./local-plugins/ansible-backstage-plugin-catalog-backend-module-apme
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        backend:
+          ansible.backstage-plugin-catalog-backend-module-apme: {}
+
+  # Scaffolder actions including ansible:register:git-repository
+  # (used by Template:default/apme-register-git-repository).
+  - package: ./local-plugins/ansible-plugin-scaffolder-backend-module-backstage-rhaap
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        backend:
+          ansible.plugin-scaffolder-backend-module-backstage-rhaap: {}
+
+  # Catalog routes for git-repository registration (POST …/ansible/git-repository).
+  - package: ./local-plugins/ansible-backstage-plugin-catalog-backend-module-rhaap
+    disabled: false
+    pluginConfig:
+      dynamicPlugins:
+        backend:
+          ansible.backstage-plugin-catalog-backend-module-rhaap: {}

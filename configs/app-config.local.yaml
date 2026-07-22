@@ -1,0 +1,47 @@
+# Merged by RHDH Local on top of app-config.yaml.
+# APME_BASE_URL is substituted by scripts from .env (ansible.apme.baseUrl).
+
+app:
+  title: APME RHDH Local
+  baseUrl: http://localhost:7007
+
+# Keep guest sign-in available (RHDH Local default). Explicit so it survives
+# overrides and is visible in merged config.
+auth:
+  environment: development
+  providers:
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
+
+ansible:
+  apme:
+    enabled: true
+    # Replaced at start time from .env APME_BASE_URL
+    baseUrl: http://host.containers.internal:8080
+    checkSSL: false
+    enableAi: false
+    mockMode: false
+    targetAnsibleCoreVersion: '2.16'
+  # Required by catalog-backend-module-rhaap schema (POST …/ansible/git-repository).
+  # Stub values — no AAP sync without catalog.providers.rhaap. Not used for APME Quality.
+  rhaap:
+    baseUrl: http://127.0.0.1:9
+    token: local-dev-unused-token
+    checkSSL: false
+
+# Optional GitHub PAT: when GITHUB_TOKEN is set in .env, install_rhdh_configs
+# appends integrations.github to the installed app-config.local.yaml.
+# Do NOT put token: ${GITHUB_TOKEN} here when empty — Backstage rejects "".
+
+# APME scaffolder template + seed git-repository (no AAP required).
+# Synced into rhdh-local by scripts (see catalog/).
+catalog:
+  locations:
+    - type: file
+      target: /opt/app-root/src/configs/catalog-entities/apme-register-git-repository/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: /opt/app-root/src/configs/catalog-entities/seed-git-repository.yaml
+      rules:
+        - allow: [Component]

@@ -53,19 +53,18 @@ ansible:
     enabled: true
     baseUrl: http://localhost:8080
     checkSSL: false
-    enableAi: false
+    enableAi: true
     mockMode: false
     targetAnsibleCoreVersion: '2.16'
-    # Same local-dev escape hatch as RHDH Local app-config
-    useStockCreateForRegister: true
+    publishViaGateway: true
   # Required by catalog-backend-module-rhaap (stub — no real AAP).
   rhaap:
     baseUrl: ${AAP_HOST}
     token: ${AAP_API_TOKEN}
     checkSSL: false
 
-# FE loop: do not enforce Portal RBAC. RequirePermission maps DENY → the
-# "dropped the mic" 404 page (e.g. /self-service/repositories/catalog).
+# Local-dev only: guest is a full admin (register repos, scaffolder, catalog).
+# permission.enabled:false also stops RequirePermission → "dropped the mic" 404.
 # Guest signs in as user:development/guest (auth.environment=development).
 permission:
   enabled: false
@@ -80,15 +79,15 @@ permission:
         - name: user:default/guest
         - name: user:default/admin
 
-# Required for Add repository (stock Create) + a seed repo for Quality without AAP.
+# Seed repos + register template (guest cannot use AAP Create popup).
 # Paths substituted from env set by scripts/react.sh.
 catalog:
   locations:
     - type: file
-      target: ${PLUGIN_REPO}/examples/apme-register-git-repository/template.yaml
-      rules:
-        - allow: [Template]
-    - type: file
       target: ${APME_RHDH_DEV}/catalog/seed-git-repository.yaml
       rules:
         - allow: [Component]
+    - type: file
+      target: ${APME_RHDH_DEV}/catalog/apme-register-git-repository/template.yaml
+      rules:
+        - allow: [Template]

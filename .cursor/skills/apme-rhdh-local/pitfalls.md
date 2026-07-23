@@ -43,7 +43,7 @@ Backstage rejects `integrations.github[].token: ""`.
 After config changes: `make up`, wait ~30s for catalog refresh.
 
 - Template: `Template:default/apme-register-git-repository`
-- Seed: `Component:default/ansible-lightspeed-github-manual` (title ansible-lightspeed)
+- Seeds: `Component:default/ansible-lightspeed-github-manual` (title ansible-lightspeed), `Component:default/terrible-playbook-github-manual` (title terrible-playbook)
 
 ## `catalog-backend-module-rhaap` / `ansible.rhaap`
 
@@ -93,8 +93,8 @@ Then retry Scan in the UI.
 - `make react` “dropped the mic” on `/self-service/repositories/*` while APIs
   return 200 → **RBAC DENY**. Guest is `user:development/guest`; Portal RBAC
   was denying `ansible.gitRepositories.view` (RequirePermission → 404 page).
-  `app-config.react.yaml` sets `permission.enabled: false` for the FE loop.
-  **Restart** `make react` after pulling that change.
+  `app-config.react.yaml` / `app-config.local.yaml` set `permission.enabled: false`
+  and list guest as `rbac.admin` / `superUsers`. **Restart** after pulling.
 - `Failed to load template` / Add repository 404 → catalog has no
   `Template:default/apme-register-git-repository`. `make react` must load
   `catalog.locations` from `app-config.react.yaml` (pull + restart). Or use

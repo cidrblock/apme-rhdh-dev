@@ -39,7 +39,7 @@ Sibling checkouts (defaults — override in `.env`):
 
 | Path | Repo / branch |
 |------|----------------|
-| `$HOME/github/ansible-backstage-plugins` | [ansible/ansible-backstage-plugins](https://github.com/ansible/ansible-backstage-plugins) @ `prototype/apme` |
+| `$HOME/github/ansible-backstage-plugins` | [ansible/ansible-backstage-plugins](https://github.com/ansible/ansible-backstage-plugins) @ `feat/apme-eap-next-ui-workflow` |
 | `$HOME/github/rhdh-local` | [redhat-developer/rhdh-local](https://github.com/redhat-developer/rhdh-local) |
 | `$HOME/github/apme` | APME engine (for `tox -e up`) |
 
@@ -71,7 +71,7 @@ Sign in as **Guest**, then:
 - Content Quality: http://localhost:3001/self-service/repositories/quality
 - **Add repository:** http://localhost:3001/create/templates/default/apme-register-git-repository  
   (needs the seeded Template — restart `make react` after pull so catalog loads it)
-- **Skip Add:** Catalog → **ansible-lightspeed** → **Quality** tab (seed entity)
+- **Skip Add:** Catalog → seed entities (**ansible-lightspeed** or **terrible-playbook**) → **Quality** tab
 
 Do **not** use `/apme` in `make react` mode (legacy redirect; often 404).
 
@@ -197,7 +197,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://localhost:8080/docs
 | Plugins missing in UI | `make sync && make up`; check `rhdh-local/local-plugins/` |
 | APME calls fail / connection refused | Confirm `tox -e up`; curl `:8080`; set `APME_BASE_URL` for your runtime |
 | `rhdh-cli: command not found` | Use Node 20/22; `cd $PLUGIN_REPO && yarn install` |
-| Wrong branch | `cd $PLUGIN_REPO && git checkout prototype/apme && git pull` |
+| Wrong branch | `cd $PLUGIN_REPO && git checkout feat/apme-eap-next-ui-workflow && git pull` |
 | Port 7007 busy | Stop other RHDH Local / change ports in `rhdh-local` compose |
 | `failed to connect … podman.sock` | `systemctl --user start podman.socket` then `make up` again |
 | Blank white page | Use **http://localhost:7007** (not `127.0.0.1` — CORS). Hard-refresh. Usually duplicate API factories — our override avoids `dynamic-plugins.default.yaml` and does not register both GitRepos factories. Re-run `make up`. |

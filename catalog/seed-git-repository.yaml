@@ -1,5 +1,5 @@
-# Seed git-repository entity for local APME Quality UI without AAP / Add repository.
-# Swap annotations to point at your own playbook repo if you like.
+# Seed git-repository entities for local APME Quality UI without AAP / Add repository.
+# Guest cannot run the register template — use these Catalog entities instead.
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
@@ -29,6 +29,39 @@ spec:
   lifecycle: production
   owner: user:guest
   repository_name: ansible-lightspeed
+  repository_default_branch: main
+  repository_collection_count: 0
+  repository_ee_count: 0
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terrible-playbook-github-manual
+  namespace: default
+  title: terrible-playbook
+  description: Seed playbook with intentional findings for APME Quality testing
+  tags:
+    - git-repository
+    - github
+    - manually-registered
+  links:
+    - url: https://github.com/cidrblock/terrible-playbook
+      title: Repository
+      icon: github
+  annotations:
+    backstage.io/source-location: url:https://github.com/cidrblock/terrible-playbook
+    backstage.io/view-url: https://github.com/cidrblock/terrible-playbook
+    github.com/project-slug: cidrblock/terrible-playbook
+    ansible.io/scm-provider: github
+    ansible.io/scm-host: github.com
+    ansible.io/scm-organization: cidrblock
+    ansible.io/scm-repository: terrible-playbook
+    ansible.io/registration-method: manual
+spec:
+  type: git-repository
+  lifecycle: production
+  owner: user:guest
+  repository_name: terrible-playbook
   repository_default_branch: main
   repository_collection_count: 0
   repository_ee_count: 0

@@ -13,6 +13,21 @@ auth:
     guest:
       dangerouslyAllowOutsideDevelopment: true
 
+# Local-dev only: guest is a full admin (register repos, scaffolder, catalog).
+# Do not copy this into production overlays.
+permission:
+  enabled: false
+  rbac:
+    admin:
+      users:
+        - name: user:development/guest
+        - name: user:default/guest
+        - name: user:default/admin
+      superUsers:
+        - name: user:development/guest
+        - name: user:default/guest
+        - name: user:default/admin
+
 ansible:
   apme:
     enabled: true

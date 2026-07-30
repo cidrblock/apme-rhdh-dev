@@ -1,10 +1,9 @@
-# APME portal plugins for RHDH Local (RHDH 1.10).
+# APME portal plugins for RHDH Local (RHDH 1.10) — eap-next thin host.
 #
 # Do NOT include dynamic-plugins.default.yaml — re-loads built-ins → blank page.
 #
-# ADR-010: when APME is loaded, register gitRepositoriesExtensionsApiFactory on
-# APME only. Do NOT also register defaultGitRepositoriesExtensionsApiFactory on
-# self-service (both together → blank page / catalog API factory crash).
+# eap-next exports: apmeApiFactory, ApmeEntityTab (no ApmePage / Git Repos
+# extension factories — those were prototype-only).
 #
 # Do NOT mount LandingPage at `/` (collides with DynamicHomePage).
 
@@ -26,11 +25,10 @@ plugins:
         frontend:
           ansible.plugin-backstage-self-service:
             apiFactories:
-              # Needed for SelfServicePage (apiRef{ansible}). Safe with APME.
+              # Needed for SelfServicePage (apiRef{ansible}).
               - importName: AAPApis
               - importName: AapAuthApi
               - importName: EEBuildApis
-              # NOT defaultGitRepositoriesExtensionsApiFactory — see header.
             dynamicRoutes:
               - importName: SelfServicePage
                 path: /self-service
@@ -46,20 +44,18 @@ plugins:
           ansible.plugin-backstage-apme:
             apiFactories:
               - importName: apmeApiFactory
-              - importName: gitRepositoriesExtensionsApiFactory
-            dynamicRoutes:
-              - path: /apme
-                importName: ApmePage
-                menuItem:
-                  text: APME
-                  icon: catalog
-              - path: /apme/project/:projectId
-                importName: ApmeProjectPage
+            # Tab chrome (RHDH expands mountPoint → /context + /cards).
             entityTabs:
               - path: /apme
-                title: APME
+                title: Quality
                 mountPoint: entity.page.apme
+            # Tab body — ApmeEntityTab mounts @apme/ui-workflow.
+            mountPoints:
+              - mountPoint: entity.page.apme/cards
                 importName: ApmeEntityTab
+                config:
+                  layout:
+                    gridColumn: '1 / -1'
 
   - package: ./local-plugins/ansible-backstage-plugin-catalog-backend-module-apme
     disabled: false

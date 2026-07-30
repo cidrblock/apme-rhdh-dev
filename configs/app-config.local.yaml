@@ -34,7 +34,7 @@ ansible:
     # Replaced at start time from .env APME_BASE_URL
     baseUrl: http://host.containers.internal:8080
     checkSSL: false
-    enableAi: false
+    enableAi: true
     mockMode: false
     targetAnsibleCoreVersion: '2.16'
     # Add repository → stock Create (no AAP OAuth). Requires backstage-apme

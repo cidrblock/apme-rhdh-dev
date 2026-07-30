@@ -4,11 +4,38 @@
 
 - Use **http://localhost:7007**, not `127.0.0.1`.
 - Hard-refresh the browser.
-- Usually duplicate API factories: do **not** include `dynamic-plugins.default.yaml`
-  and do **not** register both Self-service `defaultGitRepositoriesExtensionsApiFactory`
-  and APME `gitRepositoriesExtensionsApiFactory`.
+- Usually duplicate API factories: do **not** include `dynamic-plugins.default.yaml`.
+- On **eap-next**, do **not** reference prototype-only exports (`ApmePage`,
+  `ApmeProjectPage`, `gitRepositoriesExtensionsApiFactory`) — they are gone and
+  prevent the APME frontend plugin from loading (no Quality tab).
 - Do not mount Self-service `LandingPage` at `/` (collides with DynamicHomePage).
 - Fix: restore `configs/dynamic-plugins.override.yaml` from this repo, then `make up`.
+
+## Catalog entity missing Quality tab
+
+- RHDH needs both `entityTabs` (tab chrome) and `mountPoints` →
+  `entity.page.apme/cards` with `importName: ApmeEntityTab`.
+- Confirm browser loads `/api/scalprum/ansible.plugin-backstage-apme/…` (DevTools
+  Network). If missing, pluginConfig still points at dead prototype imports.
+- Direct URL after fix:
+  `/catalog/default/component/terrible-playbook-github-manual/apme`
+- `make react` uses monolith `EntityPage` (title **Quality**); RHDH uses the
+  override above.
+
+## Quality tab vanished after `make sync-restart`
+
+- **Cause:** RHDH `install-dynamic-plugins.py` reinstalls local plugins when
+  `package.json` mtime/hash changes, then GC-deletes the same extract dir as
+  “previously installed” (old config hash left in the tracking map). Scalprum
+  drops `ansible.plugin-backstage-apme`; entity tab gone; browser 404s on
+  stale hashed assets.
+- **Check:** `podman exec rhdh ls /opt/app-root/src/dynamic-plugins-root` —
+  if `ansible-plugin-backstage-apme-*` is missing, this is it. Also
+  `curl -s localhost:7007/api/scalprum/plugins` should list
+  `ansible.plugin-backstage-apme`.
+- **Fix:** `make up` (start.sh clears `ansible-*` from the volume before
+  recreate). Hard-refresh; Guest → Enter if session is stale.
+- Do **not** chase override YAML first when Scalprum itself lacks APME.
 
 ## Sign-in / Home
 

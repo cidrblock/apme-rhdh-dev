@@ -144,6 +144,8 @@ apme-rhdh-dev/
 ├── Makefile
 ├── .env.example
 ├── .cursor/skills/apme-rhdh-local/     # Cursor skill: get up and running
+├── docs/
+│   └── user-stories/                   # acceptance stories (Quality tab, …)
 ├── configs/
 │   ├── dynamic-plugins.override.yaml   # enable APME + self-service
 │   ├── app-config.local.yaml           # apme.baseUrl + catalog template (RHDH)
@@ -194,7 +196,7 @@ curl -sS -o /dev/null -w '%{http_code}\n' http://localhost:8080/docs
 
 | Symptom | Fix |
 |---------|-----|
-| Plugins missing in UI | `make sync && make up`; check `rhdh-local/local-plugins/` |
+| Plugins missing in UI / Quality tab gone | `make up` (clears cached `ansible-*` installs — RHDH installer GC bug after sync-restart). Check Scalprum lists `ansible.plugin-backstage-apme`; hard-refresh + Guest login. |
 | APME calls fail / connection refused | Confirm `tox -e up`; curl `:8080`; set `APME_BASE_URL` for your runtime |
 | `rhdh-cli: command not found` | Use Node 20/22; `cd $PLUGIN_REPO && yarn install` |
 | Wrong branch | `cd $PLUGIN_REPO && git checkout feat/apme-eap-next-ui-workflow && git pull` |

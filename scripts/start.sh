@@ -26,12 +26,30 @@ compose_args "normal"
 echo "Starting RHDH Local in ${RHDH_LOCAL} (APME_BASE_URL=${APME_BASE_URL})"
 cd "${RHDH_LOCAL}"
 
+# RHDH install-dynamic-plugins.py GC bug: when a local plugin's config hash
+# changes but npm-pack extract dir name is unchanged, it reinstalls then
+# deletes that dir as "previously installed" (old hash still in the map).
+# Symptom: Quality / Self-service vanish after sync-restart; Scalprum 404s.
+# Clear cached local installs so every `make up` does a clean extract.
+echo "Clearing cached local dynamic plugins (installer GC workaround)…"
+if ! "${COMPOSE_ARR[@]}" run --rm --no-deps --entrypoint /bin/sh install-dynamic-plugins -c '
+  root=/dynamic-plugins-root
+  [ -d "$root" ] || exit 0
+  for d in "$root"/ansible-*; do
+    [ -e "$d" ] || continue
+    echo "  rm -rf $(basename "$d")"
+    rm -rf "$d"
+  done
+'; then
+  echo "WARNING: could not clear cached local plugins; Quality tab may vanish after reinstall"
+fi
+
 # Force recreate so install-dynamic-plugins re-runs and rhdh reloads
 # app-config.dynamic-plugins.yaml (plain `up -d` leaves a running rhdh stale).
 "${COMPOSE_ARR[@]}" up -d --force-recreate --build=false
 
 echo
 echo "RHDH Local: http://localhost:7007  (Guest login)"
-echo "Quality:    http://localhost:7007/self-service/repositories/catalog/quality"
+echo "Quality:    http://localhost:7007/catalog/default/component/terrible-playbook-github-manual/apme"
 echo "FE HMR:     make react   |   FE in RHDH: make up-dev then make sync-dev"
 echo "Logs:       (cd ${RHDH_LOCAL} && ${COMPOSE} logs -f rhdh)"

@@ -145,7 +145,7 @@ apme-rhdh-dev/
 ├── .env.example
 ├── .cursor/skills/apme-rhdh-local/     # Cursor skill: get up and running
 ├── docs/
-│   └── user-stories/                   # acceptance stories (Quality tab, …)
+│   └── user-stories/                   # pointer → EAP branch docs/user-stories
 ├── configs/
 │   ├── dynamic-plugins.override.yaml   # enable APME + self-service
 │   ├── app-config.local.yaml           # apme.baseUrl + catalog template (RHDH)

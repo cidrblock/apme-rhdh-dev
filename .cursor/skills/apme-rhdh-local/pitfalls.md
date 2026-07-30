@@ -5,9 +5,13 @@
 - Use **http://localhost:7007**, not `127.0.0.1`.
 - Hard-refresh the browser.
 - Usually duplicate API factories: do **not** include `dynamic-plugins.default.yaml`.
+- With APME + self-service both enabled, register **only**
+  `gitRepositoriesExtensionsApiFactory` (APME guest) — **not** also
+  `defaultGitRepositoriesExtensionsApiFactory` (same `apiRef` → blank page).
+  The host default belongs in self-service janus for APME-less installs only.
 - On **eap-next**, do **not** reference prototype-only exports (`ApmePage`,
-  `ApmeProjectPage`, `gitRepositoriesExtensionsApiFactory`) — they are gone and
-  prevent the APME frontend plugin from loading (no Quality tab).
+  `ApmeProjectPage`) — they are gone and prevent the APME frontend plugin
+  from loading (no Quality tab).
 - Do not mount Self-service `LandingPage` at `/` (collides with DynamicHomePage).
 - Fix: restore `configs/dynamic-plugins.override.yaml` from this repo, then `make up`.
 
@@ -42,6 +46,10 @@
 - Sign-in page only → **Guest → Enter**.
 - Home 404 → use Catalog or `/self-service/repositories/catalog` (DynamicHomePage may be absent).
 - `make react`: use `/self-service/repositories/catalog` or `/quality` — **not** `/apme`.
+- RHDH sidebar: register `GitRepositoriesPage` at `/self-service/repositories`
+  with menuItem **Git Repositories**. `SelfServicePage` alone + menu on
+  `/self-service` lands on the **templates** catalog (`/self-service/catalog`),
+  not Git Repos.
 
 ## RH AAP “Login failed, popup was closed”
 

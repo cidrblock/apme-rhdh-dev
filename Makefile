@@ -6,7 +6,7 @@ help:
 	@echo "APME RHDH Local — pick a loop:"
 	@echo ""
 	@echo "  Everyday UI (fastest HMR):"
-	@echo "    make react           yarn start → http://localhost:3001 (backend :7008)"
+	@echo "    make react           yarn start → http://localhost:3001 (stops prior :3001/:7008 first)"
 	@echo ""
 	@echo "  Dynamic plugins in RHDH:"
 	@echo "    make sync            Export plugins → local-plugins (once / backends)"
@@ -17,7 +17,7 @@ help:
 	@echo ""
 	@echo "  Other:"
 	@echo "    make setup           One-time: .env, clones, wire configs"
-	@echo "    make down            Stop RHDH Local"
+	@echo "    make down            Stop RHDH Local (not make react)"
 	@echo "    make restart         Restart rhdh (app-config only)"
 	@echo "    make status          Paths / Gateway / compose"
 

@@ -2,8 +2,8 @@
 #
 # Do NOT include dynamic-plugins.default.yaml — re-loads built-ins → blank page.
 #
-# eap-next exports: apmeApiFactory, ApmeEntityTab (no ApmePage / Git Repos
-# extension factories — those were prototype-only).
+# eap-next exports: apmeApiFactory, gitRepositoriesExtensionsApiFactory,
+# ApmeEntityTab (US-001/US-002). No ApmePage / fleet (deferred).
 #
 # Do NOT mount LandingPage at `/` (collides with DynamicHomePage).
 
@@ -29,12 +29,20 @@ plugins:
               - importName: AAPApis
               - importName: AapAuthApi
               - importName: EEBuildApis
+              # Do NOT register defaultGitRepositoriesExtensionsApiFactory here
+              # when APME is also loaded — same apiRef as
+              # gitRepositoriesExtensionsApiFactory → blank white page.
             dynamicRoutes:
+              # Keeps nested self-service routes (templates, EE, etc.).
               - importName: SelfServicePage
                 path: /self-service
+              # Primary sidebar entry — SelfServicePage alone lands on
+              # /self-service → redirects to templates catalog, not Git Repos.
+              - importName: GitRepositoriesPage
+                path: /self-service/repositories
                 menuItem:
-                  text: Self-service
-                  icon: catalog
+                  text: Git Repositories
+                  icon: github
 
   - package: ./local-plugins/ansible-plugin-backstage-apme
     disabled: false
@@ -44,6 +52,7 @@ plugins:
           ansible.plugin-backstage-apme:
             apiFactories:
               - importName: apmeApiFactory
+              - importName: gitRepositoriesExtensionsApiFactory
             # Tab chrome (RHDH expands mountPoint → /context + /cards).
             entityTabs:
               - path: /apme

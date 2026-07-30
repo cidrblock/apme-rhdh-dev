@@ -64,16 +64,63 @@ port_in_use() {
   fi
 }
 
-if port_in_use "${REACT_PORT}"; then
-  echo "ERROR: port ${REACT_PORT} is already in use (frontend)." >&2
-  echo "       Free it, or set REACT_PORT and update configs/app-config.react.yaml." >&2
-  exit 1
-fi
-if port_in_use "${REACT_BACKEND_PORT}"; then
-  echo "ERROR: port ${REACT_BACKEND_PORT} is already in use (backend)." >&2
-  echo "       Free it, or set REACT_BACKEND_PORT / update configs/app-config.react.yaml." >&2
-  exit 1
-fi
+# PIDs listening on TCP port (ss preferred; lsof fallback).
+pids_on_port() {
+  local port="$1"
+  if command -v ss >/dev/null 2>&1; then
+    ss -tlnpH 2>/dev/null \
+      | grep -E ":${port}\\s" \
+      | grep -oE 'pid=[0-9]+' \
+      | cut -d= -f2 \
+      | sort -u
+  elif command -v lsof >/dev/null 2>&1; then
+    lsof -t -iTCP:"${port}" -sTCP:LISTEN 2>/dev/null | sort -u
+  fi
+}
+
+# Stop a prior make react (or anything) on FE/backend ports so restart is one command.
+stop_react_ports() {
+  local port pids pid
+  local any=0
+  for port in "${REACT_PORT}" "${REACT_BACKEND_PORT}"; do
+    pids="$(pids_on_port "${port}" || true)"
+    if [[ -z "${pids}" ]]; then
+      continue
+    fi
+    any=1
+    echo "Stopping process(es) on :${port}: ${pids//$'\n'/ }"
+    # shellcheck disable=SC2086
+    kill ${pids} 2>/dev/null || true
+  done
+  if [[ "${any}" -eq 0 ]]; then
+    return 0
+  fi
+  # Give listeners time to exit; escalate if needed.
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    if ! port_in_use "${REACT_PORT}" && ! port_in_use "${REACT_BACKEND_PORT}"; then
+      echo "Ports ${REACT_PORT} / ${REACT_BACKEND_PORT} free."
+      return 0
+    fi
+    sleep 0.3
+  done
+  for port in "${REACT_PORT}" "${REACT_BACKEND_PORT}"; do
+    pids="$(pids_on_port "${port}" || true)"
+    if [[ -n "${pids}" ]]; then
+      echo "Force-killing stubborn listener(s) on :${port}: ${pids//$'\n'/ }"
+      # shellcheck disable=SC2086
+      kill -9 ${pids} 2>/dev/null || true
+    fi
+  done
+  sleep 0.2
+  if port_in_use "${REACT_PORT}" || port_in_use "${REACT_BACKEND_PORT}"; then
+    echo "ERROR: could not free ports ${REACT_PORT} / ${REACT_BACKEND_PORT}." >&2
+    echo "       Free them manually, or set REACT_PORT / REACT_BACKEND_PORT." >&2
+    exit 1
+  fi
+  echo "Ports ${REACT_PORT} / ${REACT_BACKEND_PORT} free."
+}
+
+stop_react_ports
 
 if ! curl -sf -o /dev/null "http://127.0.0.1:8080/docs"; then
   echo "WARNING: APME Gateway not reachable at http://127.0.0.1:8080"
